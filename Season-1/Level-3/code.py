@@ -23,33 +23,21 @@ class TaxPayer:
 
     # returns the path of an optional profile picture that users can set
     def get_prof_picture(self, path=None):
-        # setting a profile picture is optional
-        if not path:
-            pass
-
-        # defends against path traversal attacks
-        if path.startswith('/') or path.startswith('..'):
-            return None
-
-        # builds path
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        prof_picture_path = os.path.normpath(os.path.join(base_dir, path))
-
-        with open(prof_picture_path, 'rb') as pic:
-            picture = bytearray(pic.read())
-
         # assume that image is returned on screen after this
-        return prof_picture_path
+        return getPath(path)
 
     # returns the path of an attached tax form that every user should submit
     def get_tax_form_attachment(self, path=None):
-        tax_data = None
-
-        if not path:
-            raise Exception("Error: Tax form is required for all users")
-
-        with open(path, 'rb') as form:
-            tax_data = bytearray(form.read())
-
         # assume that tax data is returned on screen after this
-        return path
+        return getPath(path)
+        
+def getPath(fileName=None):
+    if not fileName:
+        raise Exception("Missing file name when requesting to open a file")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    filepath = os.path.normpath(os.path.join(base_dir, fileName))
+    return filepath if base_dir == os.path.commonpath([base_dir, filepath]) else None
+
+def getBufferReader(fileName=None):
+    filePath = getPath(fileName)
+    return open(getPath(fileName), 'rb') if filePath else None
